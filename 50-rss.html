@@ -1,0 +1,35 @@
+<script type="text/javascript">
+	RED.nodes.registerType('rss', {
+		category: 'function',
+		color: '#F3B567',
+		defaults: {
+			name: {value:""}
+		},
+		inputs:1,
+		outputs:1,
+		icon: "feed.png",
+		label: function() {
+			return this.name || "rss";
+		}
+	});
+</script>
+
+<script type="text/x-red" data-template-name="rss">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="rss">
+    <p>A node that converts the message payload into a RSS feed.</p>
+
+    <p>Messages sent to this node are expected to have a <code>feedOptions</code> property and a <code>items</code> property.</p>
+
+    <p>The <code>feedOptions</code> property should be an object containing
+    configurations needed by the <a href="https://www.npmjs.com/package/rss">rss</a> module.<p>
+
+    <p>The <code>items</code> property should be an array containing objects
+    that has a <code>itemOptions</code> property. The <code>itemOptions</code>
+    property should also contain configurations needed by the rss module.</p>
+</script>
