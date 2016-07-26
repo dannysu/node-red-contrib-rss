@@ -75,20 +75,66 @@
         resizeRule(container);
     }
 
-	RED.nodes.registerType('rss', {
-		category: 'function',
-		color: '#F3B567',
-		defaults: {
-			name: { value:"" },
-            feedOptionRules: [],
-            itemOptionRules: []
-		},
-		inputs:1,
-		outputs:1,
-		icon: "feed.png",
-		label: function() {
-			return this.name || "rss";
-		},
+    RED.nodes.registerType('rss', {
+        category: 'function',
+        color: '#F3B567',
+        defaults: {
+            name: { value: "" },
+            feedOptionRules: {
+                value: [],
+                validate: function(rules) {
+                    // Make sure that required rules are there
+                    var foundTitle = false;
+                    var foundFeedUrl = false;
+                    var foundSiteUrl = false;
+
+                    for (var i = 0; i < rules.length; i++) {
+                        var name = rules[i].name;
+                        if (name === 'title') {
+                            foundTitle = true;
+                        }
+                        else if (name === 'feed_url') {
+                            foundFeedUrl = true;
+                        }
+                        else if (name === 'site_url') {
+                            foundSiteUrl = true;
+                        }
+                    }
+
+                    return (foundTitle && foundFeedUrl && foundSiteUrl);
+                }
+            },
+            itemOptionRules: {
+                value: [],
+                validate: function(rules) {
+                    // Make sure that required rules are there
+                    var foundTitle = false;
+                    var foundDescription = false;
+                    var foundUrl = false;
+
+                    for (var i = 0; i < rules.length; i++) {
+                        var name = rules[i].name;
+                        if (name === 'title') {
+                            foundTitle = true;
+                        }
+                        else if (name === 'description') {
+                            foundDescription = true;
+                        }
+                        else if (name === 'url') {
+                            foundUrl = true;
+                        }
+                    }
+
+                    return (foundTitle && foundDescription && foundUrl);
+                }
+            }
+        },
+        inputs:1,
+        outputs:1,
+        icon: "feed.png",
+        label: function() {
+            return this.name || "rss";
+        },
         oneditprepare: function() {
             var feedOptionEditableList = $('#node-input-feed-option-rule-container')
                 .css('min-height','300px')
@@ -232,7 +278,7 @@
                 $(selector.containerSelector).editableList('height',height);
             }
         }
-	});
+    });
 </script>
 
 <script type="text/x-red" data-template-name="rss">
