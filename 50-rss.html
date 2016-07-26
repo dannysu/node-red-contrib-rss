@@ -1,16 +1,204 @@
 <script type="text/javascript">
+    function resizeRule(rule) {
+        var newWidth = rule.width();
+        rule.find('.red-ui-typedInput').typedInput("width",newWidth-150);
+    }
+
+    function addFeedOptionRule(container, index, data) {
+        var row1 = $('<div/>').appendTo(container);
+        var row2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
+
+        // Row 1
+
+        $('<div/>',{style:"display:inline-block; text-align:right; width:40px; padding-right:10px; box-sizing:border-box;"})
+            .text('Set')
+            .appendTo(row1);
+        var propertyName = $('<input/>',{style:"width:250px",class:"node-input-feed-option-rule-property-name",type:"text"})
+            .appendTo(row1);
+
+        // Row 2
+        $('<div/>',{style:"display:inline-block; text-align:right; width:40px; padding-right:10px; box-sizing:border-box;"})
+            .text('to')
+            .appendTo(row2);
+        var propertyValue = $('<input/>',{style:"width:250px",class:"node-input-feed-option-rule-property-value",type:"text"})
+            .appendTo(row2)
+            .typedInput({default:'str',types:['str', 'msg', 'flow', 'global']});
+
+        // Set values
+        propertyName.val(data.name);
+        propertyValue.typedInput('type', data.type);
+        propertyValue.typedInput('value', data.value);
+
+        var newWidth = $("#node-input-feed-option-rule-container").width();
+        resizeRule(container);
+    }
+
+    function addItemOptionRule(container, index, data) {
+        var row1 = $('<div/>').appendTo(container);
+        var row2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
+
+        // Row 1
+
+        $('<div/>',{style:"display:inline-block; text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
+            .text('Set itemOptions.')
+            .appendTo(row1);
+        var propertyName = $('<input/>',{style:"width:250px",class:"node-input-item-option-rule-property-name",type:"text"})
+            .appendTo(row1);
+
+        // Row 2
+        $('<div/>',{style:"display:inline-block; width:30px; padding-left:10px; padding-right:10px; box-sizing:border-box;"})
+            .text('to')
+            .appendTo(row2);
+
+        var selectField = $('<select/>',{class:"node-input-rule-type",style:"width:130px; margin-right:10px;"}).appendTo(row2);
+        selectField.append($("<option></option>").val('str').text('str'));
+        selectField.append($("<option></option>").val('msg').text('msg.payload[i].'));
+        selectField.append($("<option></option>").val('flow').text('flow.'));
+        selectField.append($("<option></option>").val('global').text('global.'));
+
+        var propertyValue = $('<input/>',{style:"width:200px",class:"node-input-item-option-rule-property-value",type:"text"})
+            .appendTo(row2);
+
+        // Set values
+        propertyName.val(data.name);
+        selectField.val(data.type);
+        propertyValue.val(data.value);
+
+        var newWidth = $("#node-input-item-option-rule-container").width();
+        resizeRule(container);
+    }
+
 	RED.nodes.registerType('rss', {
 		category: 'function',
 		color: '#F3B567',
 		defaults: {
-			name: {value:""}
+			name: { value:"" },
+            feedOptionRules: [],
+            itemOptionRules: []
 		},
 		inputs:1,
 		outputs:1,
 		icon: "feed.png",
 		label: function() {
 			return this.name || "rss";
-		}
+		},
+        oneditprepare: function() {
+            var feedOptionEditableList = $('#node-input-feed-option-rule-container')
+                .css('min-height','300px')
+                .css('min-width','450px')
+                .editableList({
+                    addItem: addFeedOptionRule,
+                    resizeItem: resizeRule,
+                    removable: true,
+                    sortable: true
+                });
+
+            if (!this.feedOptionRules) {
+                // Add required feed options if no rules are set yet
+                this.feedOptionRules = [];
+                this.feedOptionRules.push({
+                    name: 'title',
+                    type: 'str',
+                    value: ''
+                });
+                this.feedOptionRules.push({
+                    name: 'feed_url',
+                    type: 'str',
+                    value: ''
+                });
+                this.feedOptionRules.push({
+                    name: 'site_url',
+                    type: 'str',
+                    value: ''
+                });
+            }
+
+            for (var i = 0; i < this.feedOptionRules.length; i++) {
+                var rule = this.feedOptionRules[i];
+                feedOptionEditableList.editableList('addItem',rule);
+            }
+
+            var itemOptionEditableList = $('#node-input-item-option-rule-container')
+                .css('min-height','300px')
+                .css('min-width','450px')
+                .editableList({
+                    addItem: addItemOptionRule,
+                    resizeItem: resizeRule,
+                    removable: true,
+                    sortable: true
+                });
+
+            if (!this.itemOptionRules) {
+                // Add required item option rules if no rules are set yet
+                this.itemOptionRules = [];
+                this.itemOptionRules.push({
+                    name: 'title',
+                    type: 'msg',
+                    value: ''
+                });
+                this.itemOptionRules.push({
+                    name: 'description',
+                    type: 'msg',
+                    value: ''
+                });
+                this.itemOptionRules.push({
+                    name: 'url',
+                    type: 'msg',
+                    value: ''
+                });
+            }
+
+            for (var i = 0; i < this.itemOptionRules.length; i++) {
+                var rule = this.itemOptionRules[i];
+                itemOptionEditableList.editableList('addItem',rule);
+            }
+        },
+        oneditsave: function() {
+            var node = this;
+
+            // Deal with saving Feed Option Rules
+            var feedOptionRules = $("#node-input-feed-option-rule-container").editableList('items');
+            node.feedOptionRules = [];
+            feedOptionRules.each(function(i) {
+                var entry = $(this);
+                var name = entry.find(".node-input-feed-option-rule-property-name").val();
+                if (name.trim().length === 0) {
+                    return;
+                }
+
+                var value = entry.find(".node-input-feed-option-rule-property-value");
+
+                var rule = {
+                    name: name,
+                    type: value.typedInput('type'),
+                    value: value.typedInput('value')
+                };
+
+                node.feedOptionRules.push(rule);
+            });
+
+            // Deal with saving Item Option Rules
+            var itemOptionRules = $("#node-input-item-option-rule-container").editableList('items');
+            node.itemOptionRules = [];
+            itemOptionRules.each(function(i) {
+                var entry = $(this);
+                var name = entry.find(".node-input-item-option-rule-property-name").val();
+                if (name.trim().length === 0) {
+                    return;
+                }
+
+                var type = entry.find(".node-input-rule-type").val();
+                var value = entry.find(".node-input-item-option-rule-property-value").val();
+
+                var rule = {
+                    name: name,
+                    type: type,
+                    value: value
+                };
+
+                node.itemOptionRules.push(rule);
+            });
+        }
 	});
 </script>
 
@@ -19,17 +207,28 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+
+    <!-- Feed Option Rules -->
+    <div class="form-row" style="margin-bottom:0;">
+        <label style="width:100%"><i class="fa fa-list"></i> Rules for Feed Options</label>
+    </div>
+    <div class="form-row node-input-feed-option-rule-container-row">
+        <ol id="node-input-feed-option-rule-container"></ol>
+    </div>
+
+    <!-- Item Option Rules -->
+    <div class="form-row" style="margin-bottom:0;">
+        <label style="width:100%"><i class="fa fa-list"></i> Rules for Item Options</label>
+    </div>
+    <div class="form-row node-input-item-option-rule-container-row">
+        <ol id="node-input-item-option-rule-container"></ol>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="rss">
     <p>A node that converts the message payload into a RSS feed.</p>
 
-    <p>Messages sent to this node are expected to have a <code>feedOptions</code> property and a <code>items</code> property.</p>
-
-    <p>The <code>feedOptions</code> property should be an object containing
-    configurations needed by the <a href="https://www.npmjs.com/package/rss">rss</a> module.<p>
-
-    <p>The <code>items</code> property should be an array containing objects
-    that has a <code>itemOptions</code> property. The <code>itemOptions</code>
-    property should also contain configurations needed by the rss module.</p>
+    <p>Messages sent to this node are expected to have an array of objects as
+    payload. The rules configured for this node determine how values are
+    populated in the RSS feed.</p>
 </script>
