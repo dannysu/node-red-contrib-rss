@@ -1,7 +1,12 @@
 <script type="text/javascript">
     function resizeRule(rule) {
         var newWidth = rule.width();
-        rule.find('.red-ui-typedInput').typedInput("width",newWidth-150);
+
+        rule.find('.red-ui-typedInput').typedInput("width",newWidth-50);
+        rule.find('.node-input-feed-option-rule-property-name').css('width', newWidth-48);
+
+        rule.find('.node-input-item-option-rule-property-name').css('width', newWidth-128);
+        rule.find('.node-input-item-option-rule-property-value').css('width', newWidth-178);
     }
 
     function addFeedOptionRule(container, index, data) {
@@ -200,6 +205,32 @@
 
                 node.itemOptionRules.push(rule);
             });
+        },
+        oneditresize: function(size) {
+            var selectors = [
+                {
+                    containerSelector: '#node-input-feed-option-rule-container',
+                    rowClass: '.node-input-feed-option-rule-container-row'
+                },
+                {
+                    containerSelector: '#node-input-item-option-rule-container',
+                    rowClass: '.node-input-item-option-rule-container-row'
+                }
+            ];
+
+            for (var i = 0; i < selectors.length; i++) {
+                var selector = selectors[i];
+
+                var rows = $("#dialog-form>div:not(" + selector.rowClass + ")");
+                var height = size.height;
+                for (var j = 0; j < rows.size(); j++) {
+                    height -= $(rows[j]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div" + selector.rowClass);
+                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+
+                $(selector.containerSelector).editableList('height',height);
+            }
         }
 	});
 </script>
