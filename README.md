@@ -1,7 +1,7 @@
 node-red-contrib-rss
 ====================
 
-A <a href="http://nodered.org" target="_new">Node-RED</a> nodes to convert items to a RSS feed
+A <a href="http://nodered.org" target="_new">Node-RED</a> node to convert items to a RSS feed
 
 Install
 -------
