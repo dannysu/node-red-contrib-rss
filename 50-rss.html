@@ -34,6 +34,8 @@
     }
 
     function addItemOptionRule(container, index, data) {
+        data.type = data.type || 'msg';
+
         var row1 = $('<div/>').appendTo(container);
         var row2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
 
