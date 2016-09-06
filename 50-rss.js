@@ -40,7 +40,7 @@ module.exports = function(RED) {
                         if (rule.type === 'str') {
                             itemOptions[rule.name] = rule.value;
                         }
-                        else if (rule.type === 'msg') {
+                        else if (rule.type === 'item') {
                             itemOptions[rule.name] = RED.util.getMessageProperty(item, rule.value) || '';
                         }
                         else if (rule.type === 'flow') {
