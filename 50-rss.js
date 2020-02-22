@@ -41,7 +41,10 @@ module.exports = function(RED) {
                             itemOptions[rule.name] = rule.value;
                         }
                         else if (rule.type === 'item') {
-                            itemOptions[rule.name] = RED.util.getMessageProperty(item, rule.value) || '';
+                            const property = RED.util.getMessageProperty(item, rule.value);
+                            if (property !== undefined) {
+                                itemOptions[rule.name] = property;
+                            }
                         }
                         else if (rule.type === 'flow') {
                             itemOptions[rule.name] = node.context().flow.get(rule.value);
